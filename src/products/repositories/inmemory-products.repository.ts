@@ -1,39 +1,40 @@
-import { Injectable } from "@nestjs/common";
-import { Product } from "../interfaces/product.interface";
-import { ProductsRepository } from "./products.repository";
-import { CreateProductDto } from "../dto/create-product.dto";
-import { UpdateProductDto } from "../dto/update-product.dto";
+import { Injectable } from '@nestjs/common';
+import { Product } from '../interfaces/product.interface';
+import { ProductsRepository } from './products.repository';
+import { CreateProductDto } from '../dto/create-product.dto';
+import { UpdateProductDto } from '../dto/update-product.dto';
 
 @Injectable()
 export class InMemoryProductsRepository extends ProductsRepository {
   private products: Product[] = [];
   private currentId = 1;
 
-  async create(product: CreateProductDto ): Promise<Product> {
+  create(product: CreateProductDto): Promise<Product> {
     const newProduct = { ...product, id: this.currentId++ };
     this.products.push(newProduct);
-    return newProduct;
+    return Promise.resolve(newProduct);
   }
 
-  async findAll(): Promise<Product[]> {
-    return this.products;
+  findAll(): Promise<Product[]> {
+    return Promise.resolve(this.products);
   }
 
-  async findById(id: number): Promise<Product | null> {
-    return this.products.find(product => product.id === id) || null;
+  findById(id: number): Promise<Product | null> {
+    const product = this.products.find((product) => product.id === id);
+    return Promise.resolve(product || null);
   }
 
-  async update(id: number, product: UpdateProductDto): Promise<Product | null> {
-    const index = this.products.findIndex(p => p.id === id);
-    if (index === -1) return null;
+  update(id: number, product: UpdateProductDto): Promise<Product | null> {
+    const index = this.products.findIndex((p) => p.id === id);
+    if (index === -1) return Promise.resolve(null);
     this.products[index] = { ...this.products[index], ...product, id };
-    return this.products[index];
+    return Promise.resolve(this.products[index]);
   }
 
-  async delete(id: number): Promise<boolean> {
-    const index = this.products.findIndex(p => p.id === id);
-    if (index === -1) return false;
+  delete(id: number): Promise<boolean> {
+    const index = this.products.findIndex((p) => p.id === id);
+    if (index === -1) return Promise.resolve(false);
     this.products.splice(index, 1);
-    return true;
+    return Promise.resolve(true);
   }
 }
